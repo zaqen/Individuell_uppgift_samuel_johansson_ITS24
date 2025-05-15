@@ -4,12 +4,13 @@ import time
 import subprocess
 import vmActions
 
-# Menyval
-meny_item1 = ["Start", "Status", "Exit"]
+# Menyer
+meny_item1 = ["Start", "Status", "Stäng av"]
+meny_item2 = ["Backa", "Stäng av"]
 vald = 0
 # VM variabler
-vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit.vmx"
-vmrun = r""
+vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
+vmrun = r"Z:\vmrun.exe"
 
 def rensa():
     os.system("cls" if os.name == "nt" else "clear")
@@ -26,6 +27,7 @@ def skriv_meny(vald, meny_item):
 
 
 def välj_val(vald, meny_item):
+    nyVald = 0
     if meny_item[vald] == "Start":
             if os.path.exists(vmx_path):
                 vmActions.start_vm(vmx_path)
@@ -36,8 +38,9 @@ def välj_val(vald, meny_item):
             else:
                 print("VM är inte igång.")
         else:
-            print("Error: VMX filen hittades ej:", vmx_path)
-    elif meny_item[vald] == "Exit":
+            print("Error: VMX filen hittades ej:", vmx_path)  
+        meny_kontroll(nyVald, meny_item2)
+    elif meny_item[vald] == "Stäng av":
         rensa()
         print("Avslutar programmet...")
         time.sleep(1)
