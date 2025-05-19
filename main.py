@@ -3,6 +3,7 @@ import keyboard
 import time
 import subprocess
 import vmActions
+import paramiko
 
 # Menyer
 meny_item1 = ["Start", "Status", "Stäng av"]
