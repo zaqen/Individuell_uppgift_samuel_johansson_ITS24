@@ -23,18 +23,18 @@ def start_vm(vmx_path):
         return
     try:
         print("Starting VM...")
-        subprocess.run([vmrun, "start", vmx_path, "gui"], capture_output=True, text=True, check=True)
+        subprocess.run([vmrun, "start", vmx_path, "nogui"], capture_output=True, text=True, check=True)
         print("VM started successfully.")
+        return
     except subprocess.CalledProcessError as error:
         print("Failed to start VM:", error.stderr)
         
 def stop_vm_soft(vmx_path):
     """Stop the VM using vmrun stop soft."""
     if is_vm_running(vmx_path):
-        print("VM is already running.")
-        return
+        print("VM is running.")
     try:
-        print("Stopping VM...soft...")
+        print("Stopping VM...softly...")
         subprocess.run([vmrun, "stop", vmx_path, "soft"], capture_output=True, text=True, check=True)
         print("VM stopped successfully.")
     except subprocess.CalledProcessError as error:
@@ -44,8 +44,7 @@ def stop_vm_soft(vmx_path):
 def stop_vm_hard(vmx_path):
     """Stop the VM using vmrun stop hard."""
     if is_vm_running(vmx_path):
-        print("VM is already running.")
-        return
+        print("VM is running.")
     try:
         print("Stopping VM...HARD!..")
         subprocess.run([vmrun, "stop", vmx_path, "hard"], capture_output=True, text=True, check=True)
