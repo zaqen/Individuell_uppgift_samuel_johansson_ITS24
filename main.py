@@ -5,6 +5,7 @@ import sys
 import time
 import subprocess
 import vmActions
+import ctypes
 #import paramiko
 
 # Menyer
@@ -16,9 +17,23 @@ vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-
 vmrun = r"Z:\vmrun.exe"
 header1 = ""
 
+
+# Kollar om programmet körs med administratörsrättigheter
+# Om inte, avsluta programmet
+if ctypes.windll.shell32.IsUserAnAdmin():
+    pass    
+else:
+    print("Denna fil kräver administratörsrättigheter för att köras")
+    print("Avslutar programmet...")
+    time.sleep(1)
+    sys.exit()
+
+
+# Rensar terminalen
 def rensa():
     os.system("cls" if os.name == "nt" else "clear")
 
+# Skriver ut en meny med val
 def skriv_meny(vald, meny_item):
     global header1
     rensa()
@@ -29,11 +44,12 @@ def skriv_meny(vald, meny_item):
     print("\n" * 3) 
     for i, item in enumerate(meny_item):
         if i == vald:
-            # Highlight selected item
+            # Highlighta itemet med en annan bakgrunds- och textfärg
             print(f"\033[48;5;15m\033[30m-> {item}\033[0m")  
         else:
             print(f"   {item}")
 
+# Väljer ett val i menyn och kör det
 def välj_val(vald, meny_item):
     nyVald = 0
     global header1
@@ -71,9 +87,11 @@ def välj_val(vald, meny_item):
     else:
         print("Error: VMX filen hittades ej:", vmx_path)
 
+# Skriver ut vald meny i text
 def vald_meny_print(vald, meny_item):
     print(f"Du valde: {meny_item[vald]}".center(os.get_terminal_size().columns))
     
+# Rörelsekontroll inom menyn med piltangenter, enter och esc
 def meny_kontroll(vald, meny_item):
     skriv_meny(vald, meny_item)
     while True:
@@ -99,7 +117,6 @@ def meny_kontroll(vald, meny_item):
             time.sleep(1)
             sys.exit()
 
-
-       
+# Huvudprogrammet som kör första gången programmet startas     
 meny_kontroll(vald, meny_item1)
 
