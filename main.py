@@ -8,7 +8,7 @@ import vmActions
 import ctypes
 #import paramiko
 
-# Menyer
+# Menyer arrays, för val
 meny_item1 = ["Start", "Status", "Stäng av VM", "Avsluta"]
 meny_item2 = ["Backa", "Avsluta"]
 vald = 0
