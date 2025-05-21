@@ -1,9 +1,12 @@
 import subprocess
 import os
+import sshLogin
 
 
 vmrun = r"Z:\vmrun.exe"
-
+vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
+node_path = "/usr/bin/node"
+balancer_path = "/home/grupp3/server_group3v0.1/loadBalancer.js"
 
 def is_vm_running(vmx_path):
     """Check if the VM is already running using vmrun list."""
@@ -105,3 +108,18 @@ def get_vm_ip(vmx_path):
         print("Error getting VM IP address:", error.stderr)
         return None
     
+def run_loadBalancer():
+    command = "sudo node /home/grupp3/server_group3v0.1/loadBalancer.js"
+    username = "grupp3"
+    password = "hejsan123"
+    ip = get_vm_ip(vmx_path)
+    
+    output, error, exit_status = sshLogin.run_ssh_command(ip, username, password, command)
+
+    # Kolla om kommandot kördes framgångsrikt
+    if exit_status == 0:
+        print("Lastbalanserare har startat korrekt.")
+    else:
+        print(f"Det gick inte att starta lastbalanseraren. Fel: {error}")
+
+    return

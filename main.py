@@ -9,7 +9,7 @@ import ctypes
 #import paramiko
 
 # Menyer arrays, för val
-meny_item1 = ["Start", "Status", "Stäng av VM", "Avsluta"]
+meny_item1 = ["Start", "Status", "Stäng av VM", "Kör igång lastbalanserare", "Avsluta"]
 meny_item2 = ["Backa", "Avsluta"]
 vald = 0
 # VM variabler
@@ -84,6 +84,15 @@ def välj_val(vald, meny_item):
     elif meny_item[vald] == "Backa":
         rensa()
         meny_kontroll(vald, meny_item1)
+    elif meny_item[vald] == "Kör igång lastbalanserare":
+        if os.path.exists(vmx_path):
+            if vmActions.is_vm_running(vmx_path):
+                print("VM är igång.")
+                print("Kör igång lastbalanserare...")
+                vmActions.run_loadBalancer()
+                return
+            else:
+                print("VM är inte igång.")
     else:
         print("Error: VMX filen hittades ej:", vmx_path)
 
