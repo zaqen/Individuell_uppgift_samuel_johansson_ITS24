@@ -23,12 +23,10 @@ def start_vm(vmx_path):
     """Start the VM using vmrun start."""
     if is_vm_running(vmx_path):
         print("VM is already running.")
-        return
     try:
         print("Starting VM...")
-        subprocess.run([vmrun, "start", vmx_path, "nogui"], capture_output=True, text=True, check=True)
+        subprocess.run([vmrun, "start", vmx_path, "nogui"], capture_output=True, text=True, check=True, timeout=5)
         print("VM started successfully.")
-        return
     except subprocess.CalledProcessError as error:
         print("Failed to start VM:", error.stderr)
         
@@ -97,18 +95,17 @@ def get_vm_info(vmx_path):
         return result.stdout
     except subprocess.CalledProcessError as error:
         print("Error getting VM info:", error.stderr)
-        return None
     
 def get_vm_ip(vmx_path):  
     """Get VM IP address using vmrun getGuestIPAddress."""
     try:
-        result = subprocess.run([vmrun, "getGuestIPAddress", vmx_path], capture_output=True, text=True, check=True)
+        result = subprocess.run([vmrun, "getGuestIPAddress", vmx_path, "nogui"], capture_output=True, text=True, check=True)
         return result.stdout.strip()
     except subprocess.CalledProcessError as error:
         print("Error getting VM IP address:", error.stderr)
         return None
     
-def run_loadBalancer():
+def run_loadBalancer(vmx_path):
     command = "sudo node /home/grupp3/server_group3v0.1/loadBalancer.js"
     username = "grupp3"
     password = "hejsan123"
@@ -121,5 +118,3 @@ def run_loadBalancer():
         print("Lastbalanserare har startat korrekt.")
     else:
         print(f"Det gick inte att starta lastbalanseraren. Fel: {error}")
-
-    return

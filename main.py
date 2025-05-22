@@ -56,7 +56,7 @@ def välj_val(vald, meny_item):
     if meny_item[vald] == "Start":
             if os.path.exists(vmx_path):
                 vmActions.start_vm(vmx_path)
-                return
+                meny_kontroll(vald, meny_item2)
     elif meny_item[vald] == "Status":
         if os.path.exists(vmx_path):
             if vmActions.is_vm_running(vmx_path):
@@ -78,9 +78,11 @@ def välj_val(vald, meny_item):
             if vmActions.is_vm_running(vmx_path):
                 vmActions.stop_vm_hard(vmx_path)
                 print("VM stängdes av.")
-                return
+                pass
             else:
                 print("VM är inte igång.")
+                pass
+            meny_kontroll(vald, meny_item2) 
     elif meny_item[vald] == "Backa":
         rensa()
         meny_kontroll(vald, meny_item1)
@@ -89,12 +91,14 @@ def välj_val(vald, meny_item):
             if vmActions.is_vm_running(vmx_path):
                 print("VM är igång.")
                 print("Kör igång lastbalanserare...")
-                vmActions.run_loadBalancer()
-                return
+                vmActions.run_loadBalancer(vmx_path)
+                meny_kontroll(vald, meny_item2)
             else:
                 print("VM är inte igång.")
+                meny_kontroll(vald, meny_item2)
     else:
         print("Error: VMX filen hittades ej:", vmx_path)
+        meny_kontroll(vald, meny_item2)
 
 # Skriver ut vald meny i text
 def vald_meny_print(vald, meny_item):
