@@ -115,6 +115,6 @@ def run_loadBalancer(vmx_path):
 
     # Kolla om kommandot kördes framgångsrikt
     if exit_status == 0:
-        print("Lastbalanserare har startat korrekt.")
+        return "Lastbalanserare har startat korrekt."
     else:
-        print(f"Det gick inte att starta lastbalanseraren. Fel: {error}")
+        return f"Det gick inte att starta lastbalanseraren. Fel: {error}"

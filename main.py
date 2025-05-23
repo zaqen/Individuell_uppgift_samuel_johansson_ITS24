@@ -16,7 +16,7 @@ vald = 0
 vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
 vmrun = r"Z:\vmrun.exe"
 header1 = ""
-
+header2 = ""
 
 # Kollar om programmet körs med administratörsrättigheter
 # Om inte, avsluta programmet
@@ -36,9 +36,10 @@ def rensa():
 # Skriver ut en meny med val
 def skriv_meny(vald, meny_item):
     global header1
+    global header2
     rensa()
     if meny_item == meny_item2:
-        print()
+        vald_meny_print()
         print(header1)
         print()
     print("\n" * 3) 
@@ -48,16 +49,21 @@ def skriv_meny(vald, meny_item):
             print(f"\033[48;5;15m\033[30m-> {item}\033[0m")  
         else:
             print(f"   {item}")
+    
 
 # Väljer ett val i menyn och kör det
 def välj_val(vald, meny_item):
     nyVald = 0
     global header1
+    global header2
     if meny_item[vald] == "Start":
             if os.path.exists(vmx_path):
                 vmActions.start_vm(vmx_path)
+                header1 = "VM startad."
+                header2 = meny_item[vald]
                 meny_kontroll(vald, meny_item2)
     elif meny_item[vald] == "Status":
+        header2 = meny_item[vald]
         if os.path.exists(vmx_path):
             if vmActions.is_vm_running(vmx_path):
                 header1 = "VM är igång."
@@ -74,10 +80,12 @@ def välj_val(vald, meny_item):
         time.sleep(1)
         exit()
     elif meny_item[vald] == "Stäng av VM":
+        header2 = meny_item[vald]
         if os.path.exists(vmx_path):
             if vmActions.is_vm_running(vmx_path):
                 vmActions.stop_vm_hard(vmx_path)
                 print("VM stängdes av.")
+                header1 = "VM stängdes av."
                 pass
             else:
                 print("VM är inte igång.")
@@ -85,13 +93,15 @@ def välj_val(vald, meny_item):
             meny_kontroll(vald, meny_item2) 
     elif meny_item[vald] == "Backa":
         rensa()
+        header2 = meny_item[vald]
         meny_kontroll(vald, meny_item1)
     elif meny_item[vald] == "Kör igång lastbalanserare":
+        header2 = meny_item[vald]
         if os.path.exists(vmx_path):
             if vmActions.is_vm_running(vmx_path):
                 print("VM är igång.")
                 print("Kör igång lastbalanserare...")
-                vmActions.run_loadBalancer(vmx_path)
+                header1 = vmActions.run_loadBalancer(vmx_path)
                 meny_kontroll(vald, meny_item2)
             else:
                 print("VM är inte igång.")
@@ -101,8 +111,9 @@ def välj_val(vald, meny_item):
         meny_kontroll(vald, meny_item2)
 
 # Skriver ut vald meny i text
-def vald_meny_print(vald, meny_item):
-    print(f"Du valde: {meny_item[vald]}".center(os.get_terminal_size().columns))
+def vald_meny_print():
+    global header2
+    print(f"Du valde: {header2}".center(os.get_terminal_size().columns))
     
 # Rörelsekontroll inom menyn med piltangenter, enter och esc
 def meny_kontroll(vald, meny_item):
