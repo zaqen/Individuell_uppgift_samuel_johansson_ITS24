@@ -115,6 +115,36 @@ def run_loadBalancer(vmx_path):
 
     # Kolla om kommandot kördes framgångsrikt
     if exit_status == 0:
-        return "Lastbalanserare har startat korrekt."
+        return "Lastbalanserare har startats korrekt."
     else:
         return f"Det gick inte att starta lastbalanseraren. Fel: {error}"
+
+def run_server1(vmx_path, balancer_ip, database_ip):
+    command = f"node /home/grupp3/server_group3v0.1/server1.js {balancer_ip} {database_ip}" #testar för att se om det går att köra utan sudo
+    username = "grupp3"
+    password = "hejsan123"
+    ip = get_vm_ip(vmx_path)
+    
+    output, error, exit_status = sshLogin.run_ssh_command(ip, username, password, command)
+
+    # Kolla om kommandot kördes framgångsrikt
+    if exit_status == 0:
+        return "Webbservern har startats korrekt."
+    else:
+        return f"Det gick inte att starta webbservern. Fel: {error}"
+    
+def run_database(vmx_path):
+    command = "sudo node /home/grupp3/server_group3v0.1/Database.js"
+    username = "grupp3"
+    password = "hejsan123"
+    ip = get_vm_ip(vmx_path)
+
+    output, error, exit_status = sshLogin.run_ssh_command(ip, username, password, command)
+
+    # Kolla om kommandot kördes framgångsrikt
+    if exit_status == 0:
+        return "Databas-servern har startats korrekt."
+    else:
+        return f"Det gick inte att starta databas-servern. Fel: {error}"
+    
+    
