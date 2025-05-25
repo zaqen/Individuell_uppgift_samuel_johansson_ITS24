@@ -2,7 +2,7 @@ import subprocess
 import os
 import sshLogin
 from dotenv import load_dotenv
-load_dotenv(".env.dev")
+load_dotenv(".env.local")
 
 vmrun = os.getenv("VMRUN_PATH")
 #vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
