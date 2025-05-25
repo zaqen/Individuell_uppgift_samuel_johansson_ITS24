@@ -36,7 +36,7 @@ def is_admin():
         sys.exit()
 is_admin()
 
-load_dotenv(".env.dev")
+load_dotenv(".env.local")
 VM_PATH_LIST = ["", "", "", ""]  # Lista för VM paths
 # Hämtar VM paths från miljövariabler
 VM_PATH_LIST[0] = os.getenv("VM_LOAD_BALANCER_PATH")
