@@ -2,6 +2,9 @@ import subprocess
 import os
 import sshLogin
 from dotenv import load_dotenv
+import sys
+import msvcrt
+
 load_dotenv(".env.local")
 
 vmrun = os.getenv("VMRUN_PATH")
@@ -149,4 +152,22 @@ def run_database(vmx_path):
     else:
         return f"Det gick inte att starta databas-servern. Fel: {error}"
     
-    
+def get_password_with_stars(prompt=""):
+    print(prompt, end='', flush=True)
+    password = ""
+    while True:
+        char = msvcrt.getch()
+        if char in {b'\r', b'\n'}:  # Enter
+            print()  # Go to next line
+            break
+        elif char == b'\x08':  # Backspace
+            if len(password) > 0:
+                password = password[:-1]
+                print('\b \b', end='', flush=True)
+        elif char == b'\x1b':  # ESC
+            print("\nAvbrutet.")
+            sys.exit()
+        else:
+            password += char.decode('utf-8')
+            print('*', end='', flush=True)
+    return password

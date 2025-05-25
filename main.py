@@ -6,6 +6,7 @@ import subprocess
 import vmActions
 import ctypes
 from dotenv import load_dotenv
+import hashlib
 
 # Menyer arrays, för val
 meny_item1 = ["Välj VM att hantera", "Välj Javascript att köra", "Starta VM", "Stäng av VM", "Status", "Avsluta"]
@@ -35,6 +36,28 @@ def is_admin():
         time.sleep(1)
         sys.exit()
 is_admin()
+
+
+# Lösenordshantering
+#Hashat lösenord
+stored_passkey = "a9a6c6e73b20ba3b3e5b4af90a44603c566bb03af6f54832adebded12d4c0177d8183b82631a89192de4a9a88bb5b3fc"  
+max_tries = 3
+# Tre försök att skriva rätt lösenord
+for attempt in range(max_tries):
+    passkey = vmActions.get_password_with_stars("Ange lösenord för att fortsätta: ")
+    input_result = hashlib.sha384(passkey.encode()).hexdigest()
+
+    if input_result == stored_passkey:
+        print("Lösenord korrekt. Fortsätter...")
+        break
+    else:
+        print("Fel lösenord.")
+        if attempt < max_tries - 1:
+            print(f"Försök kvar: {max_tries - attempt - 1}")
+        else:
+            print("För många felaktiga försök. Avslutar programmet...")
+            time.sleep(2)
+            sys.exit()
 
 load_dotenv(".env.local")
 VM_PATH_LIST = ["", "", "", ""]  # Lista för VM paths
