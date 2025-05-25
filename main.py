@@ -5,6 +5,7 @@ import time
 import subprocess
 import vmActions
 import ctypes
+from dotenv import load_dotenv
 
 # Menyer arrays, för val
 meny_item1 = ["Välj VM att hantera", "Välj Javascript att köra", "Starta VM", "Stäng av VM", "Status", "Avsluta"]
@@ -13,15 +14,12 @@ meny_item3 = ["Lastbalanserare", "Webbserver 1", "Webbserver 2", "MySQL Databas"
 meny_item4 = ["Kör Lastbalanserare", "Kör Webbserver", "Kör Databas", "Backa", "Avsluta"]
 vald = 0
 # VM variabler
-vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
-#vmx_path = r"F:\Virituella Maskiner\CloneUbuntuServer1\Clone of Ubuntu 64-bit.vmx"
-vmrun = r"Z:\vmrun.exe"
+vmx_path = "" #r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
+#vmrun = r"Z:\vmrun.exe"
 activeVM = "ingen VM"
-VM_PATH_LIST = [
-    r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx", #Lastbalanserare [0]
-    r"F:\Virituella Maskiner\CloneUbuntuServer1\Clone of Ubuntu 64-bit.vmx", #Webbserver 1 [1]
-    r"F:\Virituella Maskiner\CloneUbuntuServer2\Clone2 of Ubuntu 64-bit.vmx", #Webbserver 2 [2]
-    r"F:\Virituella Maskiner\MySQL_VM\Clone of MySQL Test DB.vmx"] #MySQL Databas [3]
+
+
+
 header1 = "" # Handling utförd av val
 header2 = "" # Vilket val du gjorde
 header3 = f"Du hanterar {activeVM} för tillfället."
@@ -38,6 +36,14 @@ def is_admin():
         sys.exit()
 is_admin()
 
+load_dotenv(".env.dev")
+VM_PATH_LIST = ["", "", "", ""]  # Lista för VM paths
+# Hämtar VM paths från miljövariabler
+VM_PATH_LIST[0] = os.getenv("VM_LOAD_BALANCER_PATH")
+VM_PATH_LIST[1] = os.getenv("VM_WEB_SERVER_1_PATH")
+VM_PATH_LIST[2] = os.getenv("VM_WEB_SERVER_2_PATH")
+VM_PATH_LIST[3] = os.getenv("VM_DATABASE_PATH")
+vmrun = os.getenv("VMRUN_PATH")
 # Rensar terminalen
 def rensa():
     os.system("cls" if os.name == "nt" else "clear")
@@ -47,10 +53,10 @@ def skriv_meny(vald, meny_item):
     global header1
     global header2
     rensa()
-    if meny_item == meny_item2:
-        vald_meny_print()
-        print(header1)
-        print()
+    
+    vald_meny_print()
+    print(header1)
+        
     print("\n" * 3) 
     for i, item in enumerate(meny_item):
         if i == vald:
@@ -83,11 +89,10 @@ def välj_val(vald, meny_item):
         header2 = meny_item[vald]
         if os.path.exists(vmx_path):
             if vmActions.is_vm_running(vmx_path):
-                header1 = f"{activeVM} är igång."
-                print(header1)
+                ip = vmActions.get_vm_ip(vmx_path)
+                header1 = f"{activeVM} är igång med IP: {ip}"
             else:
                 header1 = "VM är inte igång."
-                print(header1)
         else:
             print("Error: VMX filen hittades ej:", vmx_path)  
         meny_kontroll(nyVald, meny_item2)
@@ -166,7 +171,7 @@ def välj_val(vald, meny_item):
     # Välj vilken VM du vill hantera och göra val för, dvs ändra vmx_path
     elif meny_item[vald] == meny_item3[0]:  # Lastbalanserare
         header2 = meny_item[vald]
-        if os.path.exists(vmx_path):
+        if os.path.exists(VM_PATH_LIST[0]):
             activeVM = meny_item3[0]
             header1 = f"Du hanterar nu {meny_item3[0]}"
             vmx_path = VM_PATH_LIST[0]
@@ -176,7 +181,7 @@ def välj_val(vald, meny_item):
             meny_kontroll(vald, meny_item2)
     elif meny_item[vald] == meny_item3[1]:  # Webbserver 1
         header2 = meny_item[vald]
-        if os.path.exists(vmx_path):
+        if os.path.exists(VM_PATH_LIST[1]):
             activeVM = meny_item3[1]
             header1 = f"Du hanterar nu {meny_item3[1]}"
             vmx_path = VM_PATH_LIST[1]
@@ -186,7 +191,7 @@ def välj_val(vald, meny_item):
             meny_kontroll(vald, meny_item2)
     elif meny_item[vald] == meny_item3[2]:  # Webbserver 2
         header2 = meny_item[vald]
-        if os.path.exists(vmx_path):
+        if os.path.exists(VM_PATH_LIST[2]):
             activeVM = meny_item3[2]
             header1 = f"Du hanterar nu {meny_item3[2]}"
             vmx_path = VM_PATH_LIST[2]
@@ -196,7 +201,7 @@ def välj_val(vald, meny_item):
             meny_kontroll(vald, meny_item2)
     elif meny_item[vald] == meny_item3[3]:  # MySQL Databas
         header2 = meny_item[vald]
-        if os.path.exists(vmx_path):
+        if os.path.exists(VM_PATH_LIST[3]):
             activeVM = meny_item3[3]
             header1 = f"Du hanterar nu {meny_item3[3]}"
             vmx_path = VM_PATH_LIST[3]

@@ -1,10 +1,11 @@
 import subprocess
 import os
 import sshLogin
+from dotenv import load_dotenv
+load_dotenv(".env.dev")
 
-
-vmrun = r"Z:\vmrun.exe"
-vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
+vmrun = os.getenv("VMRUN_PATH")
+#vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
 node_path = "/usr/bin/node"
 balancer_path = "/home/grupp3/server_group3v0.1/loadBalancer.js"
 
@@ -13,8 +14,9 @@ def is_vm_running(vmx_path):
     try:
         result = subprocess.run([vmrun, "list"], capture_output=True, text=True, check=True)
         running_vms = result.stdout.splitlines()[1:]
-        running_vms = [vm.strip().lower() for vm in running_vms]
-        return vmx_path.lower() in running_vms
+        running_vms = [os.path.normcase(os.path.normpath(vm.strip())) for vm in running_vms]
+        vmx_path_clean = os.path.normcase(os.path.normpath(vmx_path.strip()))
+        return vmx_path_clean in running_vms
     except subprocess.CalledProcessError as error:
         print("Error listing VMs:", error.stderr)
         return False
@@ -115,7 +117,7 @@ def run_loadBalancer(vmx_path):
 
     # Kolla om kommandot kördes framgångsrikt
     if exit_status == 0:
-        return "Lastbalanserare har startats korrekt."
+        return f"Lastbalanserare har startats korrekt och körs på IP: {ip}"
     else:
         return f"Det gick inte att starta lastbalanseraren. Fel: {error}"
 
@@ -129,7 +131,7 @@ def run_server1(vmx_path, balancer_ip, database_ip):
 
     # Kolla om kommandot kördes framgångsrikt
     if exit_status == 0:
-        return "Webbservern har startats korrekt."
+        return f"Webbservern har startats korrekt och körs på IP: {ip}"
     else:
         return f"Det gick inte att starta webbservern. Fel: {error}"
     
@@ -143,7 +145,7 @@ def run_database(vmx_path):
 
     # Kolla om kommandot kördes framgångsrikt
     if exit_status == 0:
-        return "Databas-servern har startats korrekt."
+        return f"Databas-servern har startats korrekt och körs på IP: {ip}"
     else:
         return f"Det gick inte att starta databas-servern. Fel: {error}"
     
