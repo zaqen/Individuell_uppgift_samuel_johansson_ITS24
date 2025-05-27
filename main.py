@@ -8,8 +8,9 @@ import ctypes
 from dotenv import load_dotenv
 import hashlib
 
-# Menyer arrays, för val
-meny_item1 = ["Välj VM att hantera", "Välj Javascript att köra", "Starta VM", "Stäng av VM", "Status", "Avsluta"]
+# Meny-arrays, Används för att bygga upp de olika typerna av menyer
+# Används för att trigga if-satser i 'välj val()'
+meny_item1 = ["Välj VM att hantera", "Välj Javascript att köra", "Starta VM", "Stäng av VM", "Stäng av alla VMs", "Status", "Avsluta"]
 meny_item2 = ["Backa", "Avsluta"]
 meny_item3 = ["Lastbalanserare", "Webbserver 1", "Webbserver 2", "MySQL Databas", "Backa", "Avsluta"]
 meny_item4 = ["Kör Lastbalanserare", "Kör Webbserver", "Kör Databas", "Backa", "Avsluta"]
@@ -17,10 +18,10 @@ vald = 0
 # VM variabler
 vmx_path = "" #r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
 #vmrun = r"Z:\vmrun.exe"
-activeVM = "ingen VM"
+activeVM = "ingen VM" #stalls in till vilken VM som hanteras, ändrad så fort ett val görs
 
 
-
+#Dynamiska textvariabler som används vid menynavigering
 header1 = "" # Handling utförd av val
 header2 = "" # Vilket val du gjorde
 header3 = f"Du hanterar {activeVM} för tillfället."
@@ -36,7 +37,6 @@ def is_admin():
         time.sleep(1)
         sys.exit()
 is_admin()
-
 
 # Lösenordshantering
 #Hashat lösenord
@@ -59,6 +59,7 @@ for attempt in range(max_tries):
             time.sleep(2)
             sys.exit()
 
+#Laddar in miljövariabler från .env.local filen
 load_dotenv(".env.local")
 VM_PATH_LIST = ["", "", "", ""]  # Lista för VM paths
 # Hämtar VM paths från miljövariabler
@@ -88,7 +89,6 @@ def skriv_meny(vald, meny_item):
         else:
             print(f"   {item}")
     
-
 # Väljer ett val i menyn och kör det
 def välj_val(vald, meny_item):
     nyVald = 0
@@ -135,7 +135,21 @@ def välj_val(vald, meny_item):
             else:
                 print("VM är inte igång.")
                 pass
-            meny_kontroll(vald, meny_item2) 
+            meny_kontroll(vald, meny_item2)
+    elif meny_item[vald] == "Stäng av alla VMs":
+        rensa()
+        print("Stänger av alla VMs...")
+        for vm_name, vm_path in zip(meny_item3[:4], VM_PATH_LIST):
+            if vm_path and os.path.exists(vm_path):
+                if vmActions.is_vm_running(vm_path):
+                    vmActions.stop_vm_hard(vm_path)
+                    print(f"{vm_name} stängdes av.")
+                else:
+                    print(f"{vm_name} är inte igång.")
+            else:
+                print(f"Error: VMX-filen hittades ej för {vm_name}.")
+        header1 = "Alla VMs stängdes av."
+        meny_kontroll(vald, meny_item2)
     elif meny_item[vald] == "Backa":
         rensa()
         header2 = meny_item[vald]

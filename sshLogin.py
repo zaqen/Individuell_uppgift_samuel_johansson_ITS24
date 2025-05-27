@@ -1,4 +1,6 @@
 import paramiko
+#Den här funktionen används för att starta en process i bakgrunden på en VM via SSH
+#Det körs i bakgrunden för att inte stoppa scriptet från att fortsätta köra
 
 def run_ssh_command(ip, username, password, command):
     """

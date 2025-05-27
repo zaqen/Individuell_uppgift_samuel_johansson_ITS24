@@ -5,15 +5,18 @@ from dotenv import load_dotenv
 import sys
 import msvcrt
 
+# Ladda miljövariabler från lokala .env-filen
 load_dotenv(".env.local")
 
 vmrun = os.getenv("VMRUN_PATH")
-#vmx_path = r"C:\Users\Samuel\Documents\Virtual Machines\Ubuntu 64-bit\Ubuntu 64-bit.vmx"
-node_path = "/usr/bin/node"
-balancer_path = "/home/grupp3/server_group3v0.1/loadBalancer.js"
 
-def is_vm_running(vmx_path):
-    """Check if the VM is already running using vmrun list."""
+# Detta är sökvägen till node.js som används för att köra JavaScript-filerna i min Ubuntumiljö
+node_path = "/usr/bin/node"
+#balancer_path = "/home/grupp3/server_group3v0.1/loadBalancer.js"
+
+
+def is_vm_running(vmx_path): #kollar om VMen är igång
+    """Kolla om VM redan körs via vmrun list"""
     try:
         result = subprocess.run([vmrun, "list"], capture_output=True, text=True, check=True)
         running_vms = result.stdout.splitlines()[1:]
@@ -24,10 +27,10 @@ def is_vm_running(vmx_path):
         print("Error listing VMs:", error.stderr)
         return False
     
-def start_vm(vmx_path):
-    """Start the VM using vmrun start."""
+def start_vm(vmx_path): #Startar VM med vmrun utan GUI
+    """Starta VM med vmrun utan GUI."""
     if is_vm_running(vmx_path):
-        print("VM is already running.")
+        print("VM är redan på.")
     try:
         print("Starting VM...")
         subprocess.run([vmrun, "start", vmx_path, "nogui"], capture_output=True, text=True, check=True, timeout=5)
@@ -35,31 +38,31 @@ def start_vm(vmx_path):
     except subprocess.CalledProcessError as error:
         print("Failed to start VM:", error.stderr)
         
-def stop_vm_soft(vmx_path):
+def stop_vm_soft(vmx_path): #Används inte för tillfället
     """Stop the VM using vmrun stop soft."""
     if is_vm_running(vmx_path):
-        print("VM is running.")
+        print("VM är på.")
     try:
-        print("Stopping VM...softly...")
+        print("Stänger av VM...mjukt...")
         subprocess.run([vmrun, "stop", vmx_path, "soft"], capture_output=True, text=True, check=True)
         print("VM stopped successfully.")
     except subprocess.CalledProcessError as error:
         print("Failed to stop VM:", error.stderr)
         
         
-def stop_vm_hard(vmx_path):
-    """Stop the VM using vmrun stop hard."""
+def stop_vm_hard(vmx_path): #stänger av VM med vmrun stop hard
+    """Stäng av VM hårt"""
     if is_vm_running(vmx_path):
-        print("VM is running.")
+        print("VM är på")
     try:
-        print("Stopping VM...HARD!..")
+        print("Stänger av VM...HÅRT!..")
         subprocess.run([vmrun, "stop", vmx_path, "hard"], capture_output=True, text=True, check=True)
         print("VM stopped successfully.")
     except subprocess.CalledProcessError as error:
         print("Failed to stop VM:", error.stderr)
         
 
-def suspend_vm(vmx_path):
+def suspend_vm(vmx_path): #Används inte för tillfället
     """Suspend the VM using vmrun suspend."""
     if is_vm_running(vmx_path):
         print("VM is already running.")
@@ -71,7 +74,7 @@ def suspend_vm(vmx_path):
     except subprocess.CalledProcessError as error:
         print("Failed to suspend VM:", error.stderr)
         
-def reset_vm(vmx_path): 
+def reset_vm(vmx_path):  #Används inte för tillfället
     """Reset the VM using vmrun reset."""
     if is_vm_running(vmx_path):
         print("VM is already running.")
@@ -83,7 +86,7 @@ def reset_vm(vmx_path):
     except subprocess.CalledProcessError as error:
         print("Failed to reset VM:", error.stderr)
         
-def list_vms():
+def list_vms(): #Används inte för tillfället
     """List all VMs using vmrun list."""
     try:
         result = subprocess.run([vmrun, "list"], capture_output=True, text=True, check=True)
@@ -93,7 +96,7 @@ def list_vms():
         print("Error listing VMs:", error.stderr)
         return []
     
-def get_vm_info(vmx_path):
+def get_vm_info(vmx_path): #Används inte för tillfället
     """Get VM information using vmrun getGuestInfo."""
     try:
         result = subprocess.run([vmrun, "getGuestInfo", vmx_path], capture_output=True, text=True, check=True)
@@ -101,7 +104,7 @@ def get_vm_info(vmx_path):
     except subprocess.CalledProcessError as error:
         print("Error getting VM info:", error.stderr)
     
-def get_vm_ip(vmx_path):  
+def get_vm_ip(vmx_path):  #Skaffar IP-adressen för VM med vmrun getGuestIPAddress
     """Get VM IP address using vmrun getGuestIPAddress."""
     try:
         result = subprocess.run([vmrun, "getGuestIPAddress", vmx_path, "nogui"], capture_output=True, text=True, check=True)
@@ -110,7 +113,7 @@ def get_vm_ip(vmx_path):
         print("Error getting VM IP address:", error.stderr)
         return None
     
-def run_loadBalancer(vmx_path):
+def run_loadBalancer(vmx_path): #Startar loadBalancer.js med vmrun
     command = "sudo node /home/grupp3/server_group3v0.1/loadBalancer.js"
     username = "grupp3"
     password = "hejsan123"
@@ -124,7 +127,7 @@ def run_loadBalancer(vmx_path):
     else:
         return f"Det gick inte att starta lastbalanseraren. Fel: {error}"
 
-def run_server1(vmx_path, balancer_ip, database_ip):
+def run_server1(vmx_path, balancer_ip, database_ip): #Startar server1.js med vmrun
     command = f"node /home/grupp3/server_group3v0.1/server1.js {balancer_ip} {database_ip}" #testar för att se om det går att köra utan sudo
     username = "grupp3"
     password = "hejsan123"
@@ -138,7 +141,7 @@ def run_server1(vmx_path, balancer_ip, database_ip):
     else:
         return f"Det gick inte att starta webbservern. Fel: {error}"
     
-def run_database(vmx_path):
+def run_database(vmx_path): #Startar Database.js med vmrun
     command = "sudo node /home/grupp3/server_group3v0.1/Database.js"
     username = "grupp3"
     password = "hejsan123"
@@ -152,7 +155,7 @@ def run_database(vmx_path):
     else:
         return f"Det gick inte att starta databas-servern. Fel: {error}"
     
-def get_password_with_stars(prompt=""):
+def get_password_with_stars(prompt=""): #Funktion för att få lösenord skyddat med stjärnor i terminalen vid inloggning
     print(prompt, end='', flush=True)
     password = ""
     while True:
