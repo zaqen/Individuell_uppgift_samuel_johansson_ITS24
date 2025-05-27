@@ -9,7 +9,8 @@ import msvcrt
 load_dotenv(".env.local")
 
 vmrun = os.getenv("VMRUN_PATH")
-
+username = "grupp3"
+password = "hejsan123"
 # Detta är sökvägen till node.js som används för att köra JavaScript-filerna i min Ubuntumiljö
 node_path = "/usr/bin/node"
 #balancer_path = "/home/grupp3/server_group3v0.1/loadBalancer.js"
@@ -38,7 +39,7 @@ def start_vm(vmx_path): #Startar VM med vmrun utan GUI
     except subprocess.CalledProcessError as error:
         print("Failed to start VM:", error.stderr)
         
-def stop_vm_soft(vmx_path): #Används inte för tillfället
+def stop_vm_soft(vmx_path): #Används inte för tillfället, uppenbar framtida användning
     """Stop the VM using vmrun stop soft."""
     if is_vm_running(vmx_path):
         print("VM är på.")
@@ -48,8 +49,7 @@ def stop_vm_soft(vmx_path): #Används inte för tillfället
         print("VM stopped successfully.")
     except subprocess.CalledProcessError as error:
         print("Failed to stop VM:", error.stderr)
-        
-        
+           
 def stop_vm_hard(vmx_path): #stänger av VM med vmrun stop hard
     """Stäng av VM hårt"""
     if is_vm_running(vmx_path):
@@ -60,31 +60,6 @@ def stop_vm_hard(vmx_path): #stänger av VM med vmrun stop hard
         print("VM stopped successfully.")
     except subprocess.CalledProcessError as error:
         print("Failed to stop VM:", error.stderr)
-        
-
-def suspend_vm(vmx_path): #Används inte för tillfället
-    """Suspend the VM using vmrun suspend."""
-    if is_vm_running(vmx_path):
-        print("VM is already running.")
-        return
-    try:
-        print("Suspending VM...")
-        subprocess.run([vmrun, "suspend", vmx_path], capture_output=True, text=True, check=True)
-        print("VM suspended successfully.")
-    except subprocess.CalledProcessError as error:
-        print("Failed to suspend VM:", error.stderr)
-        
-def reset_vm(vmx_path):  #Används inte för tillfället
-    """Reset the VM using vmrun reset."""
-    if is_vm_running(vmx_path):
-        print("VM is already running.")
-        return
-    try:
-        print("Resetting VM...")
-        subprocess.run([vmrun, "reset", vmx_path], capture_output=True, text=True, check=True)
-        print("VM reset successfully.")
-    except subprocess.CalledProcessError as error:
-        print("Failed to reset VM:", error.stderr)
         
 def list_vms(): #Används inte för tillfället
     """List all VMs using vmrun list."""
@@ -115,8 +90,6 @@ def get_vm_ip(vmx_path):  #Skaffar IP-adressen för VM med vmrun getGuestIPAddre
     
 def run_loadBalancer(vmx_path): #Startar loadBalancer.js med vmrun
     command = "sudo node /home/grupp3/server_group3v0.1/loadBalancer.js"
-    username = "grupp3"
-    password = "hejsan123"
     ip = get_vm_ip(vmx_path)
     
     output, error, exit_status = sshLogin.run_ssh_command(ip, username, password, command)
@@ -129,8 +102,6 @@ def run_loadBalancer(vmx_path): #Startar loadBalancer.js med vmrun
 
 def run_server1(vmx_path, balancer_ip, database_ip): #Startar server1.js med vmrun
     command = f"node /home/grupp3/server_group3v0.1/server1.js {balancer_ip} {database_ip}" #testar för att se om det går att köra utan sudo
-    username = "grupp3"
-    password = "hejsan123"
     ip = get_vm_ip(vmx_path)
     
     output, error, exit_status = sshLogin.run_ssh_command(ip, username, password, command)
@@ -143,8 +114,6 @@ def run_server1(vmx_path, balancer_ip, database_ip): #Startar server1.js med vmr
     
 def run_database(vmx_path): #Startar Database.js med vmrun
     command = "sudo node /home/grupp3/server_group3v0.1/Database.js"
-    username = "grupp3"
-    password = "hejsan123"
     ip = get_vm_ip(vmx_path)
 
     output, error, exit_status = sshLogin.run_ssh_command(ip, username, password, command)
@@ -154,7 +123,20 @@ def run_database(vmx_path): #Startar Database.js med vmrun
         return f"Databas-servern har startats korrekt och körs på IP: {ip}"
     else:
         return f"Det gick inte att starta databas-servern. Fel: {error}"
-    
+
+def git_pull_repo(vmx_path):
+    repo_path = "/home/grupp3/server_group3v0.1"
+    command = f"cd {repo_path} && git pull"
+    ip = get_vm_ip(vmx_path)
+
+    output, error, exit_status = sshLogin.run_ssh_command(ip, username, password, command)
+
+    if exit_status == 0:
+        return f"Git-pull lyckades:\n{output}"
+    else:
+        return f"Git-pull misslyckades. Fel:\n{error}"
+
+
 def get_password_with_stars(prompt=""): #Funktion för att få lösenord skyddat med stjärnor i terminalen vid inloggning
     print(prompt, end='', flush=True)
     password = ""
