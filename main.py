@@ -1,11 +1,11 @@
-import os
-import msvcrt
-import sys
-import time
-import vmActions
-import ctypes
-from dotenv import load_dotenv
-import hashlib
+import os           # Används för att hantera filsystem och miljövariabler
+import msvcrt       # Används för att fånga tangenttryckningar i Windows. Jag använder den för att göra meny_kontroll
+import sys          # Används för systemspecifika funktioner så som att avsluta programmet
+import time         # Används för tidsrelaterade funktioner, sleep eller tidsmätning
+import vmActions    # Min egna fil, den innehåller vmrun-funktioner
+import ctypes       # Används för systemanrop. Ex; för minneshantering eller API-anrop
+from dotenv import load_dotenv #Används för att ladda in paths från en environment-fil
+import hashlib      #Andvänds för att hantera inloggning till skriptet men främst hashning
 #----------------------------------------------------------------------------------------------
 # Meny-arrays, Används för att bygga upp de olika typerna av menyer
 # Används för att trigga if-satser i 'välj val()'-funktionen

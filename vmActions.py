@@ -1,6 +1,6 @@
 import subprocess
 import os
-import sshLogin
+import sshLogin #Min egna fil som jag använder för att logga in i en VM med SSH för att utföra kommandon.
 from dotenv import load_dotenv
 import sys
 import msvcrt
