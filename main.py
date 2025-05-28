@@ -2,7 +2,6 @@ import os
 import msvcrt
 import sys
 import time
-import subprocess
 import vmActions
 import ctypes
 from dotenv import load_dotenv
