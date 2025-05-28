@@ -7,13 +7,15 @@ import vmActions
 import ctypes
 from dotenv import load_dotenv
 import hashlib
-
+#----------------------------------------------------------------------------------------------
 # Meny-arrays, Används för att bygga upp de olika typerna av menyer
-# Används för att trigga if-satser i 'välj val()'
-meny_item1 = ["Välj VM att hantera", "Välj Javascript att köra", "Starta VM", "Stäng av VM", "Stäng av alla VMs", "Status", "Avsluta"]
+# Används för att trigga if-satser i 'välj val()'-funktionen
+meny_item1 = ["Välj VM att hantera", "Välj skript att köra", "Välj service att stänga av", "Förinställda Program", "Starta VM", "Stäng av VM", "Status", "Avsluta"]
 meny_item2 = ["Backa"]
 meny_item3 = ["Lastbalanserare", "Webbserver 1", "Webbserver 2", "MySQL Databas", "Backa"]
-meny_item4 = ["Kör Lastbalanserare", "Kör Webbserver", "Kör Databas", "Backa"]
+meny_item4 = ["Kör Lastbalanserare", "Kör Webbserver", "Kör Databas", "Uppdatera repository", "Backa"]
+meny_item5 = ["Starta alla VMs", "Kör igång lastbalanserad hemsida", "Stäng av alla VMs", "Backa"]
+meny_item6 = ["Stäng av Lastbalanserar-skript", "Stäng av Webbserver-skript", "Stäng av Databas-skript", "Backa"]
 vald = 0
 # Skapar VM-variabler, nollställd från början 
 vmx_path = "" 
@@ -22,8 +24,7 @@ activeVM = "ingen VM" #stalls in till vilken VM som hanteras, ändrad så fort e
 #Dynamiska textvariabler som används vid menynavigering
 header1 = "" # Handling utförd av val
 header2 = "" # Vilket val du gjorde
-header3 = f"Du hanterar {activeVM} för tillfället."
-
+#----------------------------------------------------------------------------------------------
 # Kollar om programmet körs med administratörsrättigheter
 # Om inte, avsluta programmet
 def is_admin():
@@ -56,7 +57,7 @@ for attempt in range(max_tries):
             print("För många felaktiga försök. Avslutar programmet...")
             time.sleep(2)
             sys.exit()
-
+#----------------------------------------------------------------------------------------------
 #Laddar in miljövariabler från .env.local filen
 load_dotenv(".env.local")
 VM_PATH_LIST = ["", "", "", ""]  # Lista för VM paths
@@ -79,7 +80,7 @@ def skriv_meny(vald, meny_item):
     vald_meny_print()
     print(header1)
         
-    print("\n" * 3) 
+    print("\n" * 2) 
     for i, item in enumerate(meny_item):
         if i == vald:
             # Highlighta itemet med en annan bakgrunds- och textfärg
@@ -95,19 +96,39 @@ def välj_val(vald, meny_item):
     global header2
     global activeVM
     global vmx_path
-    
-    # Fem enklare val i menyn, starta, status, avsluta, stäng av VM och backa
+
+#---------------------------------------------------------------------------------------------  
+# Fem enklare val i menyn, starta, status, avsluta, stäng av VM och backa
+#Inkluderar även multi-kommandon som stänger av eller startar alla 
     match meny_item[vald]:
         case "Starta VM":
-            if os.path.exists(vmx_path):
+            if os.path.exists(vmx_path) and not vmActions.is_vm_running(vmx_path):
                 vmActions.start_vm(vmx_path)
                 header1 = f"{activeVM} startad."
+                header2 = meny_item[vald]
+                meny_kontroll(vald, meny_item2)
+            elif os.path.exists(vmx_path) and vmActions.is_vm_running(vmx_path):
+                header1 = f"{activeVM} är redan igång."
                 header2 = meny_item[vald]
                 meny_kontroll(vald, meny_item2)
             else:
                 print("Error: VMX filen hittades ej:", vmx_path)
                 meny_kontroll(vald, meny_item2)
-
+         
+        case "Starta alla VMs": #Startar alla VMs i VM_PATH_LIST
+            rensa()
+            print("Startar alla VMs...")
+            for vm_name, vm_path in zip(meny_item3[:4], VM_PATH_LIST):
+                if vm_path and os.path.exists(vm_path) and not vmActions.is_vm_running(vm_path):
+                    vmActions.start_vm(vm_path)
+                    print(f"{vm_name} startad.")
+                elif vm_path and os.path.exists(vm_path) and vmActions.is_vm_running(vm_path):
+                    print(f"{vm_name} är redan igång.")
+                else:
+                    print(f"Error: VMX-filen hittades ej för {vm_name}.")
+            header1 = "Alla VMs startade."
+            meny_kontroll(vald, meny_item2)
+        
         case "Status":
             header2 = meny_item[vald]
             if os.path.exists(vmx_path):
@@ -157,65 +178,107 @@ def välj_val(vald, meny_item):
         case "Backa":
             rensa()
             header2 = meny_item[vald]
-            vald = 0  # Nollställ vald index
             meny_kontroll(vald, meny_item1)
-
-        # Start av nya menyer
+            
+#--------------------------------------------------------------------------------------------
+# Start av nya menyer, även Backa är en meny men den är inte direkt en undermeny
         case "Välj VM att hantera":
             rensa()
             header2 = meny_item[vald]
-            vald = 0  # Nollställ vald index
             meny_kontroll(vald, meny_item3)
 
-        case "Välj Javascript att köra":
+        case "Välj skript att köra":
             rensa()
             header2 = meny_item[vald]
-            vald = 0  # Nollställ vald index
             meny_kontroll(vald, meny_item4)
-
-        # Kör-kommandon för de tre olika Javascripten
+        
+        case "Välj service att stänga av":
+            rensa()
+            header2 = meny_item[vald]
+            meny_kontroll(vald, meny_item6)
+            
+        case "Förinställda Program":
+            rensa()
+            header2 = meny_item[vald]
+            meny_kontroll(vald, meny_item5)
+        
+        case "Välj service att stänga av":
+            rensa()
+            header2 = meny_item[vald]
+            meny_kontroll(vald, meny_item6)
+            
+#--------------------------------------------------------------------------------------------     
+# Kör-kommandon för de tre olika Javascripten och att köra git pull
         case "Kör Lastbalanserare":  # Kör igång filen loadBalancer.js i VMen
             header2 = meny_item[vald]
-            if os.path.exists(vmx_path):
-                if vmActions.is_vm_running(vmx_path):
-                    print("VM är igång.")
-                    print("Kör igång lastbalanserare...")
-                    header1 = vmActions.run_loadBalancer(vmx_path)
-                    meny_kontroll(vald, meny_item2)
-                else:
-                    print("VM är inte igång.")
-                    meny_kontroll(vald, meny_item2)
+            kör_program_lastbalanserare(vmx_path)
+            meny_kontroll(vald, meny_item2)
 
         case "Kör Webbserver":  # Kör igång filen server1.js i VMen
             # Behöver mer info, det krävs IP från både lastbalanseraren och databasen för att kunna köra igång servern korrekt
             header2 = meny_item[vald]
-            if os.path.exists(vmx_path):
-                if vmActions.is_vm_running(vmx_path):
-                    print("VM är igång.")
-                    print("Kör igång webbserver...")
-                    header1 = vmActions.run_server1(
-                        vmx_path,
-                        vmActions.get_vm_ip(VM_PATH_LIST[0]),
-                        vmActions.get_vm_ip(VM_PATH_LIST[3])
-                    )
-                    meny_kontroll(vald, meny_item2)
-                else:
-                    print("VM är inte igång.")
-                    meny_kontroll(vald, meny_item2)
+            kör_program_webbserver(vmx_path)
+            meny_kontroll(vald, meny_item2)
 
         case "Kör Databas":  # Kör igång filen Database.js i VMen
             header2 = meny_item[vald]
+            kör_program_databas(vmx_path)
+            meny_kontroll(vald, meny_item2)
+            
+        case "Uppdatera repository":  # Uppdaterar repositoryn i VMen
+            header2 = meny_item[vald]
+            uppdatera_repository(vmx_path)
+            meny_kontroll(vald, meny_item2)
+        
+        case "Kör igång lastbalanserad hemsida":  # Startar alla VMs och kör igång hemsidan med services i rätt ordning.
+            Kör_hemsida()
+            meny_kontroll(vald, meny_item2)
+#---------------------------------------------------------------------------------------------
+# Stänger av de olika servicesen i VMen, dvs stoppar de tre Javascripten
+        case "Stäng av Lastbalanserar-skript":  # Stänger av lastbalanseraren
+            header2 = meny_item[vald]
             if os.path.exists(vmx_path):
-                if vmActions.is_vm_running(vmx_path):
-                    print("VM är igång.")
-                    print("Kör igång databas...")
-                    header1 = vmActions.run_database(vmx_path)
-                    meny_kontroll(vald, meny_item2)
+                if vmActions.is_vm_running(vmx_path) and vmActions.get_vm_ip(vmx_path) is not None:
+                    header1 = vmActions.shut_down_loadBalancer(vmx_path)
+                elif vmActions.get_vm_ip(vmx_path) is None:
+                    header1 = f"{activeVM} har ingen IP-adress, kan inte stänga av via SSH."
                 else:
-                    print("VM är inte igång.")
-                    meny_kontroll(vald, meny_item2)
+                    header1 = f"{activeVM} är inte igång."
+            else:
+                print("Error: VMX filen hittades ej:", vmx_path)
+            meny_kontroll(vald, meny_item2)
 
-        # Välj vilken VM du vill hantera och göra val för, dvs ändra vmx_path
+        case "Stäng av Webbserver-skript":  # Stänger av webbservern
+            header2 = meny_item[vald]
+            if os.path.exists(vmx_path):
+                if vmActions.is_vm_running(vmx_path) and vmActions.get_vm_ip(vmx_path) is not None:
+                    header1 = vmActions.shut_down_server1(vmx_path)
+                elif vmActions.get_vm_ip(vmx_path) is None:
+                    header1 = f"{activeVM} har ingen IP-adress, kan inte stänga av via SSH."
+                else:
+                    header1 = f"{activeVM} är inte igång."
+            else:
+                print("Error: VMX filen hittades ej:", vmx_path)
+            meny_kontroll(vald, meny_item2)
+
+        case "Stäng av Databas-skript":  # Stänger av databasen
+            header2 = meny_item[vald]
+            if os.path.exists(vmx_path):
+                if vmActions.is_vm_running(vmx_path) and vmActions.get_vm_ip(vmx_path) is not None:
+                    header1 = vmActions.shut_down_database(vmx_path)
+                elif vmActions.get_vm_ip(vmx_path) is None:
+                    header1 = f"{activeVM} har ingen IP-adress, kan inte stänga av via SSH."
+                else:
+                    header1 = f"{activeVM} är inte igång."
+            else:
+                print("Error: VMX filen hittades ej:", vmx_path)
+            meny_kontroll(vald, meny_item2)
+
+
+
+#---------------------------------------------------------------------------------------------
+# Välj vilken VM du vill hantera och göra val för, dvs ändra vmx_path
+#Undermeny av "Välj VM att hantera"
         case vm_namn if vm_namn in meny_item3[:4]:  # Matchar en av de fyra VM-namnen
             index = meny_item3.index(vm_namn)
             header2 = meny_item[vald]
@@ -228,20 +291,25 @@ def välj_val(vald, meny_item):
                 print("Error: VMX filen hittades ej:", vmx_path)
                 meny_kontroll(vald, meny_item2)
 
+#---------------------------------------------------------------------------------------------
+# Om det av någon anledning inte matchar något av de ovanstående alternativen
         case _:
             print("Ogiltigt val.")
             vald = 0  # Nollställ vald index
             meny_kontroll(vald, meny_item1)
+#----------------------------------------------------------------------------------------------
+# Om jag bryter ett case så vill jag att den ska gå tillbaka till huvudmenyn
+    meny_kontroll(vald, meny_item1)
 
 
-# Skriver ut vald meny i text
+# Skriver ut vald som du valde senast i text
 def vald_meny_print():
     global header2
     print(f"Du valde: {header2}".center(os.get_terminal_size().columns))
-    
 # Rörelsekontroll inom menyn med piltangenter, enter och esc
 def meny_kontroll(vald, meny_item):
     vald = vald % len(meny_item)  # Säkerställ att vald är inom gränserna
+    vald = 0
     skriv_meny(vald, meny_item)
     while True:
         key = msvcrt.getch()
@@ -265,6 +333,81 @@ def meny_kontroll(vald, meny_item):
             print("Avslutar programmet...")
             time.sleep(1)
             sys.exit()
+
+# Funktioner för att köra olika program på VMen
+def kör_program_lastbalanserare(vmx_path):
+    global header1
+    if os.path.exists(vmx_path):
+        if vmActions.is_vm_running(vmx_path):
+            print("VM är igång.")
+            print("Kör igång lastbalanserare...")
+            header1 = vmActions.run_loadBalancer(vmx_path)
+        else:
+            header1 = "VM är inte igång."
+                       
+def kör_program_webbserver(vmx_path):
+    global header1
+    if os.path.exists(vmx_path):
+        if vmActions.is_vm_running(vmx_path):
+            print("VM är igång.")
+            print("Kör igång webbserver...")
+            header1 = vmActions.run_server1(
+                vmx_path,
+                vmActions.get_vm_ip(VM_PATH_LIST[0]),
+                vmActions.get_vm_ip(VM_PATH_LIST[3])
+            )
+        else:
+            header1 = "VM är inte igång."
+
+def kör_program_databas(vmx_path):
+    global header1
+    if os.path.exists(vmx_path):
+        if vmActions.is_vm_running(vmx_path):
+            print("VM är igång.")
+            print("Kör igång databas...")
+            header1 = vmActions.run_database(vmx_path)
+        else:
+            header1 = "VM är inte igång."
+
+def uppdatera_repository(vmx_path):
+    global header1
+    global activeVM
+    if os.path.exists(vmx_path):
+        if vmActions.is_vm_running(vmx_path):
+            print(f"{activeVM} är igång.")
+            print("Uppdaterar repository...")
+            header1 = vmActions.git_pull_repo(vmx_path)
+        else:
+            header1 = f"{activeVM} är inte igång och kan därför inte uppdatera repository."   
+            
+def Kör_hemsida():
+    global header1
+    rensa()
+    print("Startar alla VMs och kör igång alla skript på respektive maskin...")
+    for vm_name, vm_path in zip(meny_item3[:4], VM_PATH_LIST):
+        if vm_path and os.path.exists(vm_path) and not vmActions.is_vm_running(vm_path):
+            vmActions.start_vm(vm_path)
+            print(f"{vm_name} startad.")
+        elif vm_path and os.path.exists(vm_path) and vmActions.is_vm_running(vm_path):
+            print(f"{vm_name} är redan igång.")
+        else:
+            print(f"Error: VMX-filen hittades ej för {vm_name}.")
+            meny_kontroll(vald, meny_item2)
+    print("Väntar på att alla VMs ska starta... ca 60 sekunder")
+    time.sleep(15)  # Väntar 60 sekunder för att säkerställa att alla VMs är startade
+    print("45 sekunder...")
+    time.sleep(15)
+    print("30 sekunder...")
+    time.sleep(15)
+    print("15 sekunder...")
+    time.sleep(15)
+    kör_program_lastbalanserare(VM_PATH_LIST[0])
+    kör_program_databas(VM_PATH_LIST[3])
+    kör_program_webbserver(VM_PATH_LIST[1])
+    kör_program_webbserver(VM_PATH_LIST[2])
+    header1 = "Alla VMs startade och hemsidan är igång."   
+
+
 
 # Huvudprogrammet som kör första gången programmet startas     
 meny_kontroll(vald, meny_item1)
